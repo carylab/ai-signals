@@ -1,0 +1,71 @@
+# Fly.io configuration — AI Signals backend API
+#
+# Deploy:
+#   fly deploy --config deploy/fly.backend.toml
+#
+# First-time setup:
+#   fly apps create ai-signals-api
+#   fly volumes create ai_signals_data --size 3 --region lax --app ai-signals-api
+#   fly secrets set DATABASE_URL="sqlite+aiosqlite:////data/db/ai_signals.db" \
+#                   SECRET_KEY="$(openssl rand -hex 32)" \
+#                   OPENAI_API_KEY="sk-..." \
+#                   --app ai-signals-api
+
+app       = "ai-signals-api"
+primary_region = "lax"
+
+[build]
+  dockerfile  = "../Dockerfile"
+  target      = "backend-prod"
+  [build.args]
+    BUILDKIT_INLINE_CACHE = "1"
+
+[env]
+  APP_ENV         = "production"
+  LOG_FORMAT      = "json"
+  LOG_LEVEL       = "INFO"
+  LLM_PROVIDER    = "openai"
+  LLM_MODEL       = "gpt-4o-mini"
+  EXPORT_DIR      = "/data/exports"
+  DATABASE_URL    = "sqlite+aiosqlite:////data/db/ai_signals.db"
+  PIPELINE_ENABLED = "true"
+  PIPELINE_CRON   = "0 6 * * *"
+
+[[mounts]]
+  source      = "ai_signals_data"
+  destination = "/data"
+
+[[services]]
+  internal_port = 8000
+  protocol      = "tcp"
+
+  [[services.ports]]
+    port     = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port     = 443
+    handlers = ["tls", "http"]
+
+  [services.concurrency]
+    type       = "requests"
+    hard_limit = 50
+    soft_limit = 35
+
+  [[services.http_checks]]
+    interval   = "30s"
+    timeout    = "10s"
+    grace_period = "30s"
+    method     = "GET"
+    path       = "/health"
+
+[http_service]
+  internal_port       = 8000
+  force_https         = true
+  auto_stop_machines  = true
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  size   = "shared-cpu-1x"
+  memory = "512mb"

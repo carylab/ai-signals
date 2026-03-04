@@ -1,0 +1,50 @@
+# Fly.io configuration — AI Signals pipeline worker
+#
+# Runs the standalone worker daemon (no HTTP service).
+# Shares the same volume as the backend so DB + exports are consistent.
+#
+# Deploy:
+#   fly deploy --config deploy/fly.worker.toml
+#
+# First-time setup:
+#   fly apps create ai-signals-worker
+#   # Share the volume from the backend app (or create a separate one)
+#   fly volumes create ai_signals_data --size 3 --region lax --app ai-signals-worker
+#   fly secrets set DATABASE_URL="sqlite+aiosqlite:////data/db/ai_signals.db" \
+#                   SECRET_KEY="$(openssl rand -hex 32)" \
+#                   OPENAI_API_KEY="sk-..." \
+#                   --app ai-signals-worker
+#
+# Note: For a shared SQLite volume, deploy backend and worker in the same region
+# and use the same named volume.  For PostgreSQL, simply point both at the same
+# DATABASE_URL secret.
+
+app            = "ai-signals-worker"
+primary_region = "lax"
+
+[build]
+  dockerfile = "../Dockerfile"
+  target     = "worker"
+
+[env]
+  APP_ENV          = "production"
+  LOG_FORMAT       = "json"
+  LOG_LEVEL        = "INFO"
+  LLM_PROVIDER     = "openai"
+  LLM_MODEL        = "gpt-4o-mini"
+  EXPORT_DIR       = "/data/exports"
+  DATABASE_URL     = "sqlite+aiosqlite:////data/db/ai_signals.db"
+  PIPELINE_ENABLED = "true"
+  PIPELINE_CRON    = "0 6 * * *"
+
+[[mounts]]
+  source      = "ai_signals_data"
+  destination = "/data"
+
+# Worker has no HTTP service — it's a background process only
+[processes]
+  worker = "python scripts/run_worker.py"
+
+[[vm]]
+  size   = "shared-cpu-1x"
+  memory = "512mb"

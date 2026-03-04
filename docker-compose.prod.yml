@@ -1,0 +1,70 @@
+version: '3.9'
+
+# Production compose — uses pre-built images from CI registry.
+# Usage:
+#   IMAGE_TAG=sha-abc123 docker compose -f docker-compose.prod.yml up -d
+
+x-backend-env: &backend-env
+  APP_ENV: production
+  DEBUG: "false"
+  LOG_FORMAT: json
+  LOG_LEVEL: INFO
+
+services:
+
+  backend:
+    image: ${REGISTRY:-ghcr.io/your-org/ai-signals}/backend:${IMAGE_TAG:-latest}
+    environment:
+      <<: *backend-env
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      LLM_PROVIDER: ${LLM_PROVIDER}
+      LLM_MODEL: ${LLM_MODEL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      EXPORT_DIR: /app/data/exports
+    volumes:
+      - ai_signals_data:/app/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  worker:
+    image: ${REGISTRY:-ghcr.io/your-org/ai-signals}/backend:${IMAGE_TAG:-latest}
+    command: ["python", "scripts/run_worker.py"]
+    environment:
+      <<: *backend-env
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      LLM_PROVIDER: ${LLM_PROVIDER}
+      LLM_MODEL: ${LLM_MODEL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      PIPELINE_CRON: ${PIPELINE_CRON:-0 6 * * *}
+      PIPELINE_ENABLED: "true"
+      EXPORT_DIR: /app/data/exports
+    volumes:
+      - ai_signals_data:/app/data
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: always
+
+volumes:
+  ai_signals_data:
+    driver: local

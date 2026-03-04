@@ -1,0 +1,231 @@
+"""
+NewsArticle — central entity of the entire platform.
+Includes all pipeline stages' outputs as columns so the article
+record is self-contained and queryable without extra joins.
+
+Association tables (article_tags, article_companies, article_models)
+use plain Table definitions to keep them lightweight.
+"""
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Optional, TYPE_CHECKING
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Table,
+    Text,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.core.database import Base
+
+if TYPE_CHECKING:
+    from app.models.source import NewsSource
+    from app.models.tag import Tag
+    from app.models.company import Company, AIModel
+
+
+# ---------------------------------------------------------------------------
+# Association tables (many-to-many)
+# ---------------------------------------------------------------------------
+
+article_tags = Table(
+    "article_tags",
+    Base.metadata,
+    Column(
+        "article_id",
+        Integer,
+        ForeignKey("news_articles.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "tag_id",
+        Integer,
+        ForeignKey("tags.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)
+
+article_companies = Table(
+    "article_companies",
+    Base.metadata,
+    Column(
+        "article_id",
+        Integer,
+        ForeignKey("news_articles.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "company_id",
+        Integer,
+        ForeignKey("companies.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)
+
+article_models = Table(
+    "article_models",
+    Base.metadata,
+    Column(
+        "article_id",
+        Integer,
+        ForeignKey("news_articles.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "model_id",
+        Integer,
+        ForeignKey("ai_models.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)
+
+
+# ---------------------------------------------------------------------------
+# Pipeline stage enum (stored as string for readability)
+# ---------------------------------------------------------------------------
+
+class PipelineStage:
+    COLLECTED = "collected"
+    EXTRACTED = "extracted"
+    CLEANED = "cleaned"
+    DEDUPLICATED = "deduplicated"
+    CLUSTERED = "clustered"
+    ANALYZED = "analyzed"       # summarized + tagged
+    SCORED = "scored"
+    PUBLISHED = "published"
+    FAILED = "failed"
+
+
+# ---------------------------------------------------------------------------
+# Main model
+# ---------------------------------------------------------------------------
+
+class NewsArticle(Base):
+    __tablename__ = "news_articles"
+
+    # ---- Identity -----------------------------------------------------------
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # Canonical URL (deduplicated key)
+    url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    url_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    # SHA-256 of normalised URL; primary dedup key
+
+    slug: Mapped[str] = mapped_column(String(300), unique=True, nullable=False, index=True)
+    # human-readable URL segment e.g. "openai-launches-gpt5-2026-03-04"
+
+    # ---- Raw content --------------------------------------------------------
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    raw_content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # full raw HTML / text before cleaning
+
+    clean_content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # extracted body text after readability / scraper cleaning
+
+    author: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    image_url: Mapped[Optional[str]] = mapped_column(String(2048), nullable=True)
+    language: Mapped[str] = mapped_column(String(10), default="en", nullable=False)
+    word_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # ---- Source & timing ----------------------------------------------------
+    source_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("news_sources.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    source: Mapped["NewsSource"] = relationship(back_populates="articles", lazy="joined")
+
+    published_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
+    )
+    fetched_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    # ---- LLM-generated fields -----------------------------------------------
+    summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # 2-3 sentence summary generated by LLM
+
+    summary_bullets: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # JSON string: ["bullet1", "bullet2", "bullet3"]
+
+    llm_model_used: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    # which model generated the summary e.g. "gpt-4o-mini"
+
+    # ---- Dedup & clustering -------------------------------------------------
+    sim_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    # SimHash of title+content for near-duplicate detection
+
+    cluster_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
+    # articles sharing a cluster_id cover the same story
+
+    is_cluster_representative: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    # True = this article is shown as the canonical story for the cluster
+
+    # ---- Scoring ------------------------------------------------------------
+    importance_score: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    # 0.0–1.0  based on source priority, entity prominence, keywords
+
+    freshness_score: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    # 0.0–1.0  decays over time (exponential decay, half-life 24h)
+
+    trend_score: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    # 0.0–1.0  how much this story contributes to / rides a current trend
+
+    discussion_score: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    # 0.0–1.0  proxy: cluster_size, HN points if available
+
+    final_score: Mapped[float] = mapped_column(Float, default=0.0, nullable=False, index=True)
+    # weighted combination used for ranking; indexed for fast "top N" queries
+
+    # ---- Pipeline state -----------------------------------------------------
+    pipeline_stage: Mapped[str] = mapped_column(
+        String(30), default=PipelineStage.COLLECTED, nullable=False, index=True
+    )
+    is_published: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    pipeline_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # ---- SEO ----------------------------------------------------------------
+    meta_description: Mapped[Optional[str]] = mapped_column(String(300), nullable=True)
+    # auto-generated from summary, ≤160 chars
+
+    # ---- Relationships ------------------------------------------------------
+    tags: Mapped[list["Tag"]] = relationship(
+        secondary=article_tags, back_populates="articles", lazy="select"
+    )
+    companies: Mapped[list["Company"]] = relationship(
+        secondary=article_companies, back_populates="articles", lazy="select"
+    )
+    ai_models: Mapped[list["AIModel"]] = relationship(
+        secondary=article_models, back_populates="articles", lazy="select"
+    )
+
+    # ---- Composite indexes --------------------------------------------------
+    __table_args__ = (
+        # Most common query: published articles ordered by score, filtered by date
+        Index(
+            "ix_news_published_score",
+            "is_published",
+            "final_score",
+            "published_at",
+        ),
+        # Cluster queries
+        Index("ix_news_cluster", "cluster_id", "is_cluster_representative"),
+        # Daily brief generation
+        Index("ix_news_published_at_source", "published_at", "source_id"),
+    )
+
+    def __repr__(self) -> str:
+        return (
+            f"<NewsArticle id={self.id} score={self.final_score:.2f} "
+            f"stage={self.pipeline_stage!r} slug={self.slug!r}>"
+        )

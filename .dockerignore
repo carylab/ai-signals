@@ -1,0 +1,35 @@
+# Version control
+.git
+.gitignore
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.mypy_cache
+**/.ruff_cache
+**/.pytest_cache
+**/htmlcov
+**/.coverage
+
+# Node
+frontend/node_modules
+frontend/.next
+frontend/.vercel
+
+# Dev data (never bake into images)
+backend/data/
+backend/.env
+backend/.env.local
+
+# Docs
+*.md
+docs/
+
+# CI
+.github/
+
+# IDEs
+.vscode/
+.idea/
+**/.DS_Store
