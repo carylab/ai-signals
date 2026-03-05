@@ -11,10 +11,10 @@ export function TrendTagChip({ tag }: TrendTagChipProps) {
   return (
     <Link
       href={`/topics/${tag.slug}`}
-      className={`badge ${scoreClass} hover:opacity-80 transition-opacity no-underline`}
+      className={`badge ${scoreClass} hover:brightness-125 transition-all no-underline`}
     >
       {tag.name}
-      <span className="ml-1 opacity-70">{tag.news_count_7d}↑</span>
+      <span className="ml-1.5 font-mono text-xs opacity-60">{tag.news_count_7d}↑</span>
     </Link>
   )
 }
@@ -41,15 +41,20 @@ interface TrendingCompanyRowProps {
 export function TrendingCompanyRow({ company, rank }: TrendingCompanyRowProps) {
   const scoreClass = scoreBadgeColor(company.trend_score)
   return (
-    <Link href={`/companies/${company.slug}`} className="flex items-center gap-3 py-2 border-b border-surface-border last:border-0 no-underline group">
-      <span className="text-sm font-bold text-gray-200 w-5 text-center">{rank}</span>
+    <Link
+      href={`/companies/${company.slug}`}
+      className="flex items-center gap-3 py-2.5 border-b border-surface-border/50 last:border-0 no-underline group"
+    >
+      <span className="text-xs font-mono font-bold text-brand-400/20 w-5 text-center group-hover:text-brand-400/50 transition-colors">
+        {String(rank).padStart(2, '0')}
+      </span>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 group-hover:text-brand-600 transition-colors truncate">
+        <p className="text-xs font-medium text-text-primary group-hover:text-brand-300 transition-colors truncate">
           {company.name}
         </p>
-        <p className="text-xs text-gray-400">{company.news_count_7d} articles this week</p>
+        <p className="text-xs font-mono text-text-muted">{company.news_count_7d} articles / 7d</p>
       </div>
-      <span className={`badge ${scoreClass} text-[10px] flex-shrink-0`}>
+      <span className={`badge ${scoreClass} text-xs flex-shrink-0`}>
         {formatScore(company.trend_score)}
       </span>
     </Link>

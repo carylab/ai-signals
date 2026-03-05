@@ -28,7 +28,7 @@ export function Pagination({ page, hasNext, hasPrev, baseUrl, extraParams = {} }
         <span className="btn opacity-40 cursor-default">← Prev</span>
       )}
 
-      <span className="text-sm text-gray-500">Page {page}</span>
+      <span className="text-xs font-mono text-text-muted">Page {page}</span>
 
       {hasNext ? (
         <a

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Suspense } from 'react'
 import {
   getTopArticles,
   getLatestBrief,
@@ -46,9 +45,7 @@ export default async function HomePage() {
       {/* Trending tags */}
       {tags.length > 0 && (
         <section>
-          <p className="section-title">
-            <span>Trending Topics</span>
-          </p>
+          <p className="section-title">Trending Topics</p>
           <TrendingTagsBar tags={tags} />
         </section>
       )}
@@ -63,7 +60,7 @@ export default async function HomePage() {
             <ArticleCard article={heroArticle} hero />
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {restTop.slice(0, 6).map((article) => (
               <ArticleCard key={article.id} article={article} />
             ))}
@@ -75,12 +72,18 @@ export default async function HomePage() {
           {/* Latest stream */}
           <section>
             <p className="section-title">Latest</p>
-            <div className="card p-0 divide-y divide-surface-border">
-              {latest.slice(0, 10).map((article, i) => (
-                <div key={article.id} className="px-4">
-                  <ArticleRow article={article} rank={i + 1} />
-                </div>
-              ))}
+            <div className="rounded-lg border border-surface-border bg-surface-card overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-surface-subtle/40">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
+                <span className="text-xs font-mono text-text-muted">feed.live</span>
+              </div>
+              <div className="divide-y divide-surface-border/50">
+                {latest.slice(0, 10).map((article, i) => (
+                  <div key={article.id} className="px-4">
+                    <ArticleRow article={article} rank={i + 1} />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -88,12 +91,16 @@ export default async function HomePage() {
           {companies.length > 0 && (
             <section>
               <p className="section-title">Companies in Focus</p>
-              <div className="card p-0">
-                {companies.map((company, i) => (
-                  <div key={company.slug} className="px-4">
-                    <TrendingCompanyRow company={company} rank={i + 1} />
-                  </div>
-                ))}
+              <div className="rounded-lg border border-surface-border bg-surface-card overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-surface-subtle/40">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  <span className="text-xs font-mono text-text-muted">companies.ranked</span>
+                </div>
+                <div className="px-4">
+                  {companies.map((company, i) => (
+                    <TrendingCompanyRow key={company.slug} company={company} rank={i + 1} />
+                  ))}
+                </div>
               </div>
             </section>
           )}

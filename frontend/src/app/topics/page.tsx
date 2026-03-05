@@ -29,8 +29,8 @@ export default async function TopicsPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900">Topics</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-text-primary">Topics</h1>
+        <p className="text-xs font-mono text-text-muted mt-1">
           {topics.length} topics tracked across AI news.
         </p>
       </header>

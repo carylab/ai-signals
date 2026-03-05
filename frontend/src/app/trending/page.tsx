@@ -31,8 +31,8 @@ export default async function TrendingPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900">Trending</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-text-primary">Trending</h1>
+        <p className="text-xs font-mono text-text-muted mt-1">
           What's moving in AI right now — based on article velocity and discussion.
         </p>
       </header>
@@ -57,7 +57,7 @@ export default async function TrendingPage() {
                           className={`badge ${scoreClass} hover:opacity-80 transition-opacity no-underline`}
                         >
                           {tag.name}
-                          <span className="ml-1 opacity-60 text-[9px]">
+                          <span className="ml-1 opacity-60 text-xs">
                             {tag.news_count_7d}↑
                           </span>
                         </Link>
@@ -71,12 +71,16 @@ export default async function TrendingPage() {
         {/* Company ranking */}
         <aside>
           <p className="section-title">Companies</p>
-          <div className="card p-0">
-            {companies.map((company, i) => (
-              <div key={company.slug} className="px-4">
-                <TrendingCompanyRow company={company} rank={i + 1} />
-              </div>
-            ))}
+          <div className="card p-0 overflow-hidden">
+            <div className="flex items-center gap-2 px-4 py-2 border-b border-surface-border bg-surface-subtle/40">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              <span className="text-xs font-mono text-text-muted">companies.ranked</span>
+            </div>
+            <div className="px-4">
+              {companies.map((company, i) => (
+                <TrendingCompanyRow key={company.slug} company={company} rank={i + 1} />
+              ))}
+            </div>
           </div>
         </aside>
       </div>

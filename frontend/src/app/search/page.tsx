@@ -35,7 +35,7 @@ export default async function SearchPage({ searchParams }: Props) {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900">Search</h1>
+        <h1 className="text-2xl font-bold text-text-primary">Search</h1>
       </header>
 
       {/* Search form */}
@@ -46,7 +46,7 @@ export default async function SearchPage({ searchParams }: Props) {
           defaultValue={query}
           placeholder="Search AI news…"
           autoFocus
-          className="flex-1 px-3 py-2 rounded-md border border-surface-border text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500"
+          className="flex-1 px-3 py-2 rounded-md border border-surface-border text-sm bg-surface-card text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-brand-400 focus:border-brand-400"
         />
         <button type="submit" className="btn-primary">
           Search
@@ -56,10 +56,10 @@ export default async function SearchPage({ searchParams }: Props) {
       {/* Results */}
       {query && result && (
         <div>
-          <p className="text-sm text-gray-500 mb-4">
-            {result.total} results for <strong>"{result.query}"</strong>
+          <p className="text-xs font-mono text-text-muted mb-4">
+            {result.total} results for <span className="text-brand-300">"{result.query}"</span>
             {result.took_ms > 0 && (
-              <span className="ml-1 text-gray-400">({result.took_ms}ms)</span>
+              <span className="ml-1 text-text-muted">({result.took_ms}ms)</span>
             )}
           </p>
 
@@ -92,13 +92,13 @@ export default async function SearchPage({ searchParams }: Props) {
 
       {!query && (
         <div className="text-center py-12">
-          <p className="text-gray-400 text-sm">Enter a query to search AI news articles.</p>
+          <p className="text-xs font-mono text-text-muted">Enter a query to search AI news articles.</p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {['LLM', 'GPT-4', 'Claude', 'open source', 'robotics', 'multimodal'].map((term) => (
               <a
                 key={term}
                 href={`/search?q=${encodeURIComponent(term)}`}
-                className="badge badge-gray hover:bg-gray-200 transition-colors no-underline"
+                className="badge badge-gray hover:border-brand-400/40 hover:text-brand-300 transition-colors no-underline"
               >
                 {term}
               </a>

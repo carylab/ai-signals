@@ -41,18 +41,18 @@ export default async function ArticlePage({ params }: Props) {
   return (
     <article className="max-w-3xl mx-auto">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-gray-400 mb-6">
-        <Link href="/" className="hover:text-brand-600">Home</Link>
-        <span>/</span>
+      <nav className="flex items-center gap-2 text-xs font-mono text-text-muted mb-6">
+        <Link href="/" className="hover:text-brand-300 no-underline">Home</Link>
+        <span className="text-surface-border">/</span>
         {article.tags[0] && (
           <>
-            <Link href={`/topics/${article.tags[0].slug}`} className="hover:text-brand-600">
+            <Link href={`/topics/${article.tags[0].slug}`} className="hover:text-brand-300 no-underline">
               {article.tags[0].name}
             </Link>
-            <span>/</span>
+            <span className="text-surface-border">/</span>
           </>
         )}
-        <span className="text-gray-600 truncate">{article.title.slice(0, 50)}…</span>
+        <span className="text-text-muted truncate">{article.title.slice(0, 50)}…</span>
       </nav>
 
       {/* Header */}
@@ -68,11 +68,11 @@ export default async function ArticlePage({ params }: Props) {
           </span>
         </div>
 
-        <h1 className="text-2xl font-bold leading-tight text-gray-900 mb-3">
+        <h1 className="text-2xl font-bold leading-tight text-text-primary mb-3">
           {article.title}
         </h1>
 
-        <div className="flex items-center gap-3 text-sm text-gray-500 flex-wrap">
+        <div className="flex items-center gap-3 text-xs font-mono text-text-muted flex-wrap">
           {article.author && <span>{article.author}</span>}
           {article.published_at && (
             <>
@@ -115,16 +115,16 @@ export default async function ArticlePage({ params }: Props) {
 
       {/* AI summary */}
       {(article.summary || article.summary_bullets?.length > 0) && (
-        <div className="card bg-surface-muted border-brand-200 mb-6">
-          <p className="section-title text-brand-700">AI Summary</p>
+        <div className="rounded-lg border border-brand-800/50 bg-brand-400/5 p-4 mb-6">
+          <p className="section-title">AI Summary</p>
           {article.summary && (
-            <p className="text-sm text-gray-700 leading-relaxed mb-3">{article.summary}</p>
+            <p className="text-xs text-text-secondary leading-relaxed mb-3">{article.summary}</p>
           )}
           {article.summary_bullets?.length > 0 && (
             <ul className="space-y-1.5">
               {article.summary_bullets.map((bullet, i) => (
-                <li key={i} className="flex gap-2 text-sm text-gray-700">
-                  <span className="text-brand-500 flex-shrink-0">•</span>
+                <li key={i} className="flex gap-2 text-xs text-text-secondary">
+                  <span className="text-brand-400 flex-shrink-0">›</span>
                   {bullet}
                 </li>
               ))}
@@ -135,18 +135,17 @@ export default async function ArticlePage({ params }: Props) {
 
       {/* Full content */}
       {article.clean_content && (
-        <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed mb-8">
+        <div className="prose prose-sm prose-invert max-w-none text-text-secondary leading-relaxed mb-8">
           {article.clean_content.split('\n\n').map((para, i) => (
-            <p key={i} className="mb-4">{para}</p>
+            <p key={i} className="mb-4 text-xs">{para}</p>
           ))}
         </div>
       )}
 
-      {/* Entity chips */}
       <div className="space-y-3 border-t border-surface-border pt-5">
         {article.companies.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-gray-400 w-20">Companies</span>
+            <span className="text-xs font-mono text-text-muted w-20">Companies</span>
             {article.companies.map((c) => (
               <Link key={c.slug} href={`/companies/${c.slug}`} className="badge badge-gray no-underline">
                 {c.name}
@@ -157,7 +156,7 @@ export default async function ArticlePage({ params }: Props) {
 
         {article.ai_models.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-gray-400 w-20">AI Models</span>
+            <span className="text-xs font-mono text-text-muted w-20">AI Models</span>
             {article.ai_models.map((m) => (
               <span key={m.slug} className="badge badge-gray">{m.name}</span>
             ))}
@@ -166,7 +165,7 @@ export default async function ArticlePage({ params }: Props) {
 
         {article.tags.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-gray-400 w-20">Topics</span>
+            <span className="text-xs font-mono text-text-muted w-20">Topics</span>
             {article.tags.map((tag) => (
               <Link key={tag.slug} href={`/topics/${tag.slug}`} className="badge badge-blue no-underline">
                 {tag.name}

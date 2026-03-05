@@ -17,8 +17,8 @@ export default async function CompaniesPage() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900">Companies</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-text-primary">Companies</h1>
+        <p className="text-xs font-mono text-text-muted mt-1">
           {companies.length} AI companies tracked — ranked by trend score.
         </p>
       </header>
@@ -33,23 +33,23 @@ export default async function CompaniesPage() {
               className="card flex flex-col gap-2 no-underline group"
             >
               <div className="flex items-start justify-between gap-2">
-                <h2 className="text-sm font-semibold text-gray-900 group-hover:text-brand-600 transition-colors">
+                <h2 className="text-sm font-semibold text-text-primary group-hover:text-brand-300 transition-colors">
                   {company.name}
                   {company.is_verified && (
-                    <span className="ml-1 text-blue-500 text-xs">✓</span>
+                    <span className="ml-1 text-cyan-400 text-xs">✓</span>
                   )}
                 </h2>
-                <span className={`badge ${scoreClass} text-[10px] flex-shrink-0`}>
+                <span className={`badge ${scoreClass} text-xs flex-shrink-0`}>
                   {formatScore(company.trend_score)}
                 </span>
               </div>
 
               {company.description && (
-                <p className="text-xs text-gray-500 line-clamp-2">{company.description}</p>
+                <p className="text-xs text-text-muted line-clamp-2">{company.description}</p>
               )}
 
-              <p className="text-xs text-gray-400 mt-auto">
-                {company.news_count_7d} articles this week
+              <p className="text-xs font-mono text-text-muted mt-auto">
+                {company.news_count_7d} articles / 7d
               </p>
             </Link>
           )

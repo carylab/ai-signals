@@ -5,6 +5,7 @@
 @layer base {
   :root {
     --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
   }
 
   html {
@@ -12,48 +13,112 @@
   }
 
   body {
-    @apply bg-white text-gray-900 text-sm leading-relaxed;
+    @apply bg-surface text-text-primary text-base leading-relaxed;
+    background-image:
+      linear-gradient(rgba(0,255,179,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,179,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-attachment: fixed;
   }
 
-  h1 { @apply text-2xl font-bold tracking-tight; }
-  h2 { @apply text-xl font-semibold tracking-tight; }
-  h3 { @apply text-lg font-semibold; }
+  h1 { @apply text-2xl font-bold tracking-tight text-text-primary; }
+  h2 { @apply text-xl font-semibold tracking-tight text-text-primary; }
+  h3 { @apply text-lg font-semibold text-text-primary; }
 
   a {
-    @apply text-brand-600 hover:text-brand-700 transition-colors;
+    @apply text-brand-300 hover:text-brand-200 transition-colors;
+  }
+
+  ::selection {
+    background: rgba(0,255,179,0.2);
+    color: #00ffb3;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0e1a;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e2d45;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00cc8b;
   }
 }
 
 @layer components {
   .card {
-    @apply bg-white border border-surface-border rounded-lg p-4
-           hover:shadow-sm transition-shadow;
+    @apply bg-surface-card border border-surface-border rounded-lg p-4
+           shadow-card hover:shadow-card-hover hover:border-brand-800
+           transition-all duration-200;
   }
 
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium;
   }
 
-  .badge-blue  { @apply bg-blue-100 text-blue-800; }
-  .badge-green { @apply bg-green-100 text-green-800; }
-  .badge-gray  { @apply bg-gray-100 text-gray-700; }
+  .badge-blue  {
+    @apply bg-cyan-500/10 text-cyan-400 border border-cyan-500/20;
+  }
+  .badge-green {
+    @apply bg-brand-300/10 text-brand-300 border border-brand-300/20;
+  }
+  .badge-gray  {
+    @apply bg-surface-hover text-text-secondary border border-surface-border;
+  }
+  .badge-yellow {
+    @apply bg-amber-500/10 text-amber-400 border border-amber-500/20;
+  }
+  .badge-orange {
+    @apply bg-orange-500/10 text-orange-400 border border-orange-500/20;
+  }
 
   .btn {
     @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm
-           font-medium transition-colors focus:outline-none focus:ring-2
-           focus:ring-brand-500 focus:ring-offset-1;
+           font-medium transition-all duration-150 focus:outline-none
+           focus:ring-1 focus:ring-brand-400 focus:ring-offset-1
+           focus:ring-offset-surface;
   }
 
   .btn-primary {
-    @apply btn bg-brand-600 text-white hover:bg-brand-700;
+    @apply btn bg-brand-500/20 text-brand-300 border border-brand-500/40
+           hover:bg-brand-500/30 hover:border-brand-400/60 hover:shadow-neon-green;
   }
 
   .btn-ghost {
-    @apply btn bg-transparent text-gray-600 hover:bg-surface-subtle;
+    @apply btn bg-transparent text-text-secondary border border-surface-border
+           hover:bg-surface-hover hover:text-text-primary hover:border-surface-hover;
   }
 
   .section-title {
-    @apply text-xs font-semibold uppercase tracking-widest text-gray-500
-           mb-3 flex items-center gap-2;
+    @apply text-xs font-mono font-semibold uppercase tracking-[0.15em]
+           text-brand-400/70 mb-3 flex items-center gap-2
+           before:content-['//'] before:text-brand-400/40;
+  }
+
+  .score-high   { @apply bg-brand-300/10 text-brand-300 border border-brand-300/20; }
+  .score-medium { @apply bg-amber-500/10 text-amber-400 border border-amber-500/20; }
+  .score-low    { @apply bg-orange-500/10 text-orange-400 border border-orange-500/20; }
+  .score-none   { @apply bg-surface-hover text-text-muted border border-surface-border; }
+
+  .terminal-border {
+    @apply border border-surface-border rounded-lg overflow-hidden;
+    background: linear-gradient(180deg, rgba(0,255,179,0.03) 0%, transparent 100%);
+  }
+
+  .terminal-header {
+    @apply flex items-center gap-2 px-4 py-2 border-b border-surface-border
+           bg-surface-subtle/50;
+  }
+
+  .dot {
+    @apply w-2.5 h-2.5 rounded-full;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 20px rgba(0,255,179,0.5);
   }
 }

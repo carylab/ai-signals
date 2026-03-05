@@ -30,10 +30,10 @@ export function scoreColor(score: number): string {
 }
 
 export function scoreBadgeColor(score: number): string {
-  if (score >= 0.75) return 'bg-green-100 text-green-800'
-  if (score >= 0.50) return 'bg-yellow-100 text-yellow-800'
-  if (score >= 0.25) return 'bg-orange-100 text-orange-800'
-  return 'bg-gray-100 text-gray-600'
+  if (score >= 0.75) return 'score-high'
+  if (score >= 0.50) return 'score-medium'
+  if (score >= 0.25) return 'score-low'
+  return 'score-none'
 }
 
 export function truncate(text: string, maxLen: number): string {

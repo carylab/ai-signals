@@ -61,7 +61,7 @@ export default async function DailyBriefPage({ params }: Props) {
         {brief.key_themes.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {brief.key_themes.map((theme, i) => (
-              <span key={i} className="badge bg-white/15 text-blue-50 text-[10px]">
+              <span key={i} className="badge bg-white/15 text-blue-50 text-xs">
                 {theme}
               </span>
             ))}

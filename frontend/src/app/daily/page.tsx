@@ -23,8 +23,8 @@ export default async function DailyBriefListPage({ searchParams }: Props) {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900">Daily Brief</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-text-primary">Daily Brief</h1>
+        <p className="text-xs font-mono text-text-muted mt-1">
           Daily AI intelligence briefings. Generated automatically from top articles.
         </p>
       </header>
