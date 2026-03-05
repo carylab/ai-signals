@@ -156,9 +156,6 @@ async def _execute_pipeline(target_date: Optional[str]):
         provider=settings.llm_provider,
         model=settings.llm_model,
         api_key=settings.active_llm_key or "",
-        max_retries=settings.llm_max_retries,
-        timeout=settings.llm_timeout_s,
-        temperature=settings.llm_temperature,
     )
 
     async_session = get_sessionmaker()

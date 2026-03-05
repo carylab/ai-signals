@@ -140,6 +140,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 async def create_all_tables() -> None:
     """Create all tables. Used in dev/test; prod uses Alembic migrations."""
+    import app.models  # noqa: F401 — registers all models with Base.metadata
     engine = get_engine()
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

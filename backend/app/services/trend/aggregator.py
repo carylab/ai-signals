@@ -18,7 +18,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.news import NewsArticle, article_tags, article_companies, article_models
 from app.models.tag import Tag
 from app.models.company import Company, AIModel
-from app.services.trend.calculator import EntityCounts, EntityType, compute_trend_scores, TrendResult
+from app.models.trend_snapshot import EntityType
+from app.services.trend.calculator import EntityCounts, compute_trend_scores, TrendResult
 
 logger = structlog.get_logger(__name__)
 
