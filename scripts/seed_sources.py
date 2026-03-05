@@ -253,6 +253,8 @@ SOURCES: list[dict] = [
 
 
 async def seed() -> None:
+    import os
+    os.makedirs("./data/db", exist_ok=True)
     init_db(settings.database_url)
     await create_all_tables()
 
